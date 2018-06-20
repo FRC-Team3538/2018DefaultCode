@@ -49,6 +49,25 @@ public:
 	};
 	structDriveBase DriveBase;
 
+	struct structManip {
+		VictorSP A1 { 6 };
+		VictorSP A2 { 7 };
+		SpeedControllerGroup MotorsAuxA { A1, A2 };
+
+		VictorSP B1 { 8 };
+		VictorSP B2 { 9 };
+		SpeedControllerGroup MotorsAuxB { B1, B2 };
+
+		Solenoid Sol_AuxA { 1 };
+		Solenoid Sol_AuxB { 2 };
+
+		Encoder EncoderAuxA { 4, 5 };
+
+		DigitalInput LSA_Pos { 6 };
+		DigitalInput LSA_Neg { 7 };
+	};
+	structManip Manip;
+
 	// Default Constructor
 	RJ_RobotMap();
 

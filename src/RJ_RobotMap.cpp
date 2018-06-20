@@ -16,18 +16,23 @@ RJ_RobotMap::RJ_RobotMap() {
 	DriveBase.EncoderLeft.SetReverseDirection(true);
 	DriveBase.EncoderRight.SetReverseDirection(false);
 
-	// Practice Bot
+	// Encoder Scale Factor
 	DriveBase.EncoderLeft.SetDistancePerPulse(167.0 / 16745.0 * 4.0);
 	DriveBase.EncoderRight.SetDistancePerPulse(-167.0 / 16745.0 * 4.0);
-
-	// Comp Bot
-	//DriveBase.EncoderLeft.SetDistancePerPulse(48.0 / -1523.0 * 4.0);
-	//DriveBase.EncoderRight.SetDistancePerPulse(48.0 / -1523.0 * 4.0);
 
 	// Set Default Gear
 	DriveBase.SolenoidShifter.Set(false);
 
+	// Manip Stuff
+	Manip.EncoderAuxA.SetReverseDirection(false);
 
+	Manip.EncoderAuxA.SetDistancePerPulse(1);
+
+	//Set Manip Motor Directions
+	Manip.A1.SetInverted(false);
+	Manip.A2.SetInverted(false);
+	Manip.B1.SetInverted(false);
+	Manip.B2.SetInverted(false);
 
 	//
 	// Smart Dashboard

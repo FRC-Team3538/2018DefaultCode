@@ -81,12 +81,17 @@ class Robot: public frc::TimedRobot {
 		// Low Gear by default
 		IO.DriveBase.SolenoidShifter.Set(true);
 		gearState = true;
+
+		// PCM 2 In By Default
+		IO.Manip.Sol_AuxA.Set(false);
+
+		// PCM 2 In By Default
+		IO.Manip.Sol_AuxB.Set(false);
 	}
 
 	bool bTeleAutoMode = false;
 
 	void TeleopPeriodic() {
-
 		double Control_Deadband = 0.11; // input where the joystick actually starts to move
 		double Drive_Deadband = 0.11; // command at which the motors begin to move
 
@@ -155,7 +160,29 @@ class Robot: public frc::TimedRobot {
 		/*
 		 * MANIP CODE
 		 */
+		//Aux Motors A
+		double LTrig = IO.DS.DriveStick.GetTriggerAxis(frc::GenericHID::kLeftHand) + IO.DS.OperatorStick.GetTriggerAxis(frc::GenericHID::kLeftHand);
+		double RTrig = IO.DS.DriveStick.GetTriggerAxis(frc::GenericHID::kRightHand) + IO.DS.OperatorStick.GetTriggerAxis(frc::GenericHID::kRightHand);
+		LTrig = deadband(LTrig, Control_Deadband);
+		RTrig = deadband(RTrig, Control_Deadband);
+		IO.Manip.MotorsAuxA.Set(LTrig + RTrig);
 
+		//PCM 1
+		bool BtnXBool = IO.DS.DriveStick.GetXButton() + IO.DS.OperatorStick.GetXButton();
+		IO.Manip.Sol_AuxA.Set(BtnXBool);
+
+		//PCM 2
+		bool BtnYBool = IO.DS.DriveStick.GetYButtonPressed() || IO.DS.OperatorStick.GetYButtonPressed();
+		bool PCM2Toggled = IO.Manip.Sol_AuxB.Get();
+		if(BtnYBool)
+			IO.Manip.Sol_AuxB.Set(!PCM2Toggled);
+		//Aux Motors B
+		bool BtnABool = IO.DS.DriveStick.GetAButtonPressed() || IO.DS.OperatorStick.GetAButtonPressed();
+		bool BtnBBool = IO.DS.DriveStick.GetBButtonPressed() || IO.DS.OperatorStick.GetAButtonPressed();
+		if(BtnABool)
+			IO.Manip.MotorsAuxB.Set(1);
+		if(BtnBBool)
+			IO.Manip.MotorsAuxB.Set(0);
 	}
 
 	void AutonomousInit() {
