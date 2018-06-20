@@ -1,0 +1,56 @@
+
+In General use the Right Hand Rule:
+* Positive command is Forward motion
+* X is forward, Y is left, and Z is up.
+* Positive rotation is counter clockwise
+
+
+To Drive the robot forward: 
+Lmotor = 1
+Rmotor = 1
+
+To turn the robot clockwise (Negative Rotation):
+Lmotor = 1
+Rmotor = -1
+
+To turn the robot counterclockwise (Positive Rotation): 
+Lmotor = -1
+Rmotor = 1
+
+[right motor is inverted in RobotMap]
+
+
+Elevator convention: 
+When raising the elevator: 
+ElevatorMotor1 = 1
+ElevatorMotor2 = 1
+ElevatorEncoder = Increasing in a positive direction
+
+When lowering the elevator: 
+ElevatorMotor1 = -1
+ElevatorMotor2 = -1
+ElevatorEncoder = Decreasing in a negative direction until 0
+
+[ElevatorMotor1 is inverted in RobotMap]
+
+
+
+Wrist convention: 
+When looking at the side of the elevator with the wrist mounted
+Counter-Clockwise Rotation = -1
+Encoder = Decreasing
+
+Clockwise Rotation:
+WristMotor = 1
+Encoder = Increasing
+
+
+Claw Convention: 
+Intake Motors Intaking: = 1
+Intake Motors Ejecting: = -1
+
+Claw Close     = forward
+Claw Compliant = off
+Claw Open      = reverse
+
+
