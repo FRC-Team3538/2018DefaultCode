@@ -10,6 +10,7 @@
 #include "RJ_RobotMap.h"
 
 #define MAIN_LOOP_PERIOD (0.020)
+#define DRIVE_MODES (3) //Number of drive modes
 
 class Robot: public frc::TimedRobot {
 
@@ -18,6 +19,7 @@ class Robot: public frc::TimedRobot {
 
 	// Built-In Drive code for teleop
 	DifferentialDrive Adrive { IO.DriveBase.MotorsLeft, IO.DriveBase.MotorsRight };
+	MecanumDrive Mdrive { IO.DriveBase.L2, IO.DriveBase.L1, IO.DriveBase.R1, IO.DriveBase.R2 };
 	bool gearState; // For power-breaking feature
 
 	// create pdp variable
@@ -27,8 +29,8 @@ class Robot: public frc::TimedRobot {
 	bool SensorOverride = false;
 
 	// Drive Input Filter
-	float OutputX = 0.0, OutputY = 0.0;
-
+	float OutputX = 0.0, OutputY = 0.0, OutputZ = 0.0;
+	int driveMode = 0;
 	// This number needs to be changed until the wrist reads 0 at top dead center + is toward the front of the robot
 
 	//Autonomous Variables
@@ -40,6 +42,7 @@ class Robot: public frc::TimedRobot {
 	void RobotInit() {
 		//disable drive watchdogs
 		Adrive.SetSafetyEnabled(false);
+		Mdrive.SetSafetyEnabled(false);
 
 		// Reset Encoders
 		IO.DriveBase.EncoderLeft.Reset();
@@ -68,6 +71,12 @@ class Robot: public frc::TimedRobot {
 		if (IO.DS.OperatorStick.GetBackButton())
 			SensorOverride = true;
 
+		//Cycle Drive Modes
+		bool BtnStart = IO.DS.DriveStick.GetStartButtonPressed();
+		if (BtnStart)
+			driveMode++;
+		if (driveMode == DRIVE_MODES)
+			driveMode = 0;
 	}
 
 	void DisabledPeriodic() {
@@ -76,7 +85,7 @@ class Robot: public frc::TimedRobot {
 
 	void TeleopInit() {
 		// drive command averaging filter
-		OutputX = 0, OutputY = 0;
+		OutputX = 0, OutputY = 0, OutputZ = 0;
 
 		// Low Gear by default
 		IO.DriveBase.SolenoidShifter.Set(true);
@@ -98,14 +107,17 @@ class Robot: public frc::TimedRobot {
 		// Drive Control Inputs
 		double SpeedLinear = IO.DS.DriveStick.GetY(GenericHID::kLeftHand) * 1; // get Yaxis value (forward)
 		double SpeedRotate = IO.DS.DriveStick.GetX(GenericHID::kRightHand) * -1; // get Xaxis value (turn)
+		double SpeedStrafe = IO.DS.DriveStick.GetX(GenericHID::kLeftHand) * 1; // get Xaxis value (Strafe)
 
-		// Bad joystick compensation. :)
-		SpeedLinear *= 1.05;
-		SpeedRotate *= 1.05;
+		if(driveMode == 1)
+			SpeedRotate = IO.DS.DriveStick.GetY(GenericHID::kRightHand) * 1; // get Xaxis value (turn)
+
+
 
 		// Set dead band for control inputs
 		SpeedLinear = deadband(SpeedLinear, Control_Deadband);
 		SpeedRotate = deadband(SpeedRotate, Control_Deadband);
+		SpeedStrafe = deadband(SpeedStrafe, Control_Deadband);
 
 		// Smoothing algorithm for x^3
 		if (SpeedLinear > 0.0)
@@ -114,6 +126,14 @@ class Robot: public frc::TimedRobot {
 			SpeedLinear = (1 - Drive_Deadband) * pow(SpeedLinear, 3) - Drive_Deadband;
 		else
 			SpeedLinear = 0.0;  // added for clarity
+
+		// Smoothing algorithm for x^3
+		if (SpeedStrafe > 0.0)
+			SpeedStrafe = (1 - Drive_Deadband) * pow(SpeedStrafe, 3) + Drive_Deadband;
+		else if (SpeedStrafe < 0.0)
+			SpeedStrafe = (1 - Drive_Deadband) * pow(SpeedStrafe, 3) - Drive_Deadband;
+		else
+			SpeedStrafe = 0.0;  // added for clarity
 
 		// Smoothing algorithm for x^3
 		if (SpeedRotate > 0.0)
@@ -140,9 +160,20 @@ class Robot: public frc::TimedRobot {
 
 		OutputY = (df * OutputY) + ((1.0 - df) * SpeedLinear);
 		OutputX = (df * OutputX) + ((1.0 - df) * SpeedRotate);
+		OutputZ = (df * OutputZ) + ((1.0 - df) * SpeedStrafe);
 
 		// Drive Code (WPI Built-in)
-		Adrive.ArcadeDrive(OutputY, OutputX, false);
+		switch (driveMode) {
+		case 0:
+			Adrive.ArcadeDrive(OutputY, OutputX, false);
+			break;
+		case 1:
+			Adrive.TankDrive(OutputY, OutputX, false);
+			break;
+		case 2:
+			Mdrive.DriveCartesian(OutputZ, OutputY, OutputX, 0);
+			break;
+		}
 
 		//  Rumble code
 		//  Read all motor current from PDP and display on drivers station
@@ -161,8 +192,10 @@ class Robot: public frc::TimedRobot {
 		 * MANIP CODE
 		 */
 		//Aux Motors A
-		double LTrig = IO.DS.DriveStick.GetTriggerAxis(frc::GenericHID::kLeftHand) + IO.DS.OperatorStick.GetTriggerAxis(frc::GenericHID::kLeftHand);
-		double RTrig = IO.DS.DriveStick.GetTriggerAxis(frc::GenericHID::kRightHand) + IO.DS.OperatorStick.GetTriggerAxis(frc::GenericHID::kRightHand);
+		double LTrig = IO.DS.DriveStick.GetTriggerAxis(frc::GenericHID::kLeftHand)
+				+ IO.DS.OperatorStick.GetTriggerAxis(frc::GenericHID::kLeftHand);
+		double RTrig = IO.DS.DriveStick.GetTriggerAxis(frc::GenericHID::kRightHand)
+				+ IO.DS.OperatorStick.GetTriggerAxis(frc::GenericHID::kRightHand);
 		LTrig = deadband(LTrig, Control_Deadband);
 		RTrig = deadband(RTrig, Control_Deadband);
 		IO.Manip.MotorsAuxA.Set(LTrig + RTrig);
@@ -174,14 +207,14 @@ class Robot: public frc::TimedRobot {
 		//PCM 2
 		bool BtnYBool = IO.DS.DriveStick.GetYButtonPressed() || IO.DS.OperatorStick.GetYButtonPressed();
 		bool PCM2Toggled = IO.Manip.Sol_AuxB.Get();
-		if(BtnYBool)
+		if (BtnYBool)
 			IO.Manip.Sol_AuxB.Set(!PCM2Toggled);
 		//Aux Motors B
 		bool BtnABool = IO.DS.DriveStick.GetAButtonPressed() || IO.DS.OperatorStick.GetAButtonPressed();
 		bool BtnBBool = IO.DS.DriveStick.GetBButtonPressed() || IO.DS.OperatorStick.GetAButtonPressed();
-		if(BtnABool)
+		if (BtnABool)
 			IO.Manip.MotorsAuxB.Set(1);
-		if(BtnBBool)
+		if (BtnBBool)
 			IO.Manip.MotorsAuxB.Set(0);
 	}
 
@@ -216,6 +249,7 @@ class Robot: public frc::TimedRobot {
 		// Reset the moving average filters for drive base
 		OutputY = 0;
 		OutputX = 0;
+		OutputZ = 0;
 
 	}
 
@@ -283,6 +317,7 @@ class Robot: public frc::TimedRobot {
 		IO.DriveBase.MotorsRight.Set(0);
 		OutputY = 0;
 		OutputX = 0;
+		OutputZ = 0;
 		return 1;
 	}
 
@@ -586,8 +621,19 @@ class Robot: public frc::TimedRobot {
 		// Sensor Override
 		SmartDashboard::PutBoolean("Sensor Override", SensorOverride);
 
+		//Drive Mode
+		switch (driveMode) {
+		case 0:
+			SmartDashboard::PutString(llvm::StringRef("Drive Mode"), llvm::StringRef("Split Arcade"));
+			break;
+		case 1:
+			SmartDashboard::PutString(llvm::StringRef("Drive Mode"), llvm::StringRef("Tanky Tank"));
+			break;
+		case 2:
+			SmartDashboard::PutString(llvm::StringRef("Drive Mode"), llvm::StringRef("Mecanum"));
+			break;
+		}
 	}
-
 }
 ;
 
