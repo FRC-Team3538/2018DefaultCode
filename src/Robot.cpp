@@ -31,6 +31,7 @@ class Robot: public frc::TimedRobot {
 	// Drive Input Filter
 	float OutputX = 0.0, OutputY = 0.0, OutputZ = 0.0;
 	int driveMode = 0;
+	int motorVel;
 	// This number needs to be changed until the wrist reads 0 at top dead center + is toward the front of the robot
 
 	//Autonomous Variables
@@ -216,6 +217,12 @@ class Robot: public frc::TimedRobot {
 			IO.Manip.MotorsAuxB.Set(1);
 		if (BtnBBool)
 			IO.Manip.MotorsAuxB.Set(0);
+
+		//Moar Talon Testing
+		motorVel = IO.Manip.Motor.GetSensorCollection().GetQuadratureVelocity(); //Raw Signal Edge Counts
+		double OpJoyRY = IO.DS.OperatorStick.GetY(GenericHID::kRightHand);
+		OpJoyRY = deadband( OpJoyRY, Control_Deadband);
+		IO.Manip.Motor.Set(OpJoyRY);
 	}
 
 	void AutonomousInit() {
@@ -633,6 +640,7 @@ class Robot: public frc::TimedRobot {
 			SmartDashboard::PutString(llvm::StringRef("Drive Mode"), llvm::StringRef("Mecanum"));
 			break;
 		}
+		SmartDashboard::PutNumber("Encoder Velocity", ((motorVel * 10)/1));
 	}
 }
 ;

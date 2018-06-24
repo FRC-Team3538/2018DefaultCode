@@ -34,6 +34,11 @@ RJ_RobotMap::RJ_RobotMap() {
 	Manip.B1.SetInverted(false);
 	Manip.B2.SetInverted(false);
 
+	//Talon Stufz
+	Manip.Motor.ConfigSelectedFeedbackSensor(FeedbackDevice::CTRE_MagEncoder_Relative, 0, 0); /* PIDLoop=0,timeoutMs=0 */
+	Manip.Motor.ConfigVelocityMeasurementPeriod(VelocityMeasPeriod::Period_100Ms, 0);
+	Manip.Motor.ConfigVelocityMeasurementWindow(64, 0);
+
 	//
 	// Smart Dashboard
 	//
