@@ -3,6 +3,7 @@
 
 #include "WPILib.h"
 #include "AHRS.h"
+#include "ctre/Phoenix.h"
 
 class RJ_RobotMap {
 
@@ -65,6 +66,8 @@ public:
 
 		DigitalInput LSA_Pos { 6 };
 		DigitalInput LSA_Neg { 7 };
+
+		WPI_TalonSRX Motor { 10 };
 	};
 	structManip Manip;
 

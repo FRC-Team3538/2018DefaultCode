@@ -77,6 +77,9 @@ class Robot: public frc::TimedRobot {
 			driveMode++;
 		if (driveMode == DRIVE_MODES)
 			driveMode = 0;
+
+		//Moar Moar Talon Testing
+		double EncoderCount = IO.Manip.Motor.GetSensorCollection().GetQuadratureVelocity();
 	}
 
 	void DisabledPeriodic() {
@@ -192,10 +195,8 @@ class Robot: public frc::TimedRobot {
 		 * MANIP CODE
 		 */
 		//Aux Motors A
-		double LTrig = IO.DS.DriveStick.GetTriggerAxis(frc::GenericHID::kLeftHand)
-				+ IO.DS.OperatorStick.GetTriggerAxis(frc::GenericHID::kLeftHand);
-		double RTrig = IO.DS.DriveStick.GetTriggerAxis(frc::GenericHID::kRightHand)
-				+ IO.DS.OperatorStick.GetTriggerAxis(frc::GenericHID::kRightHand);
+		double LTrig = IO.DS.DriveStick.GetTriggerAxis(frc::GenericHID::kLeftHand) + IO.DS.OperatorStick.GetTriggerAxis(frc::GenericHID::kLeftHand);
+		double RTrig = IO.DS.DriveStick.GetTriggerAxis(frc::GenericHID::kRightHand) + IO.DS.OperatorStick.GetTriggerAxis(frc::GenericHID::kRightHand);
 		LTrig = deadband(LTrig, Control_Deadband);
 		RTrig = deadband(RTrig, Control_Deadband);
 		IO.Manip.MotorsAuxA.Set(LTrig + RTrig);
@@ -216,6 +217,21 @@ class Robot: public frc::TimedRobot {
 			IO.Manip.MotorsAuxB.Set(1);
 		if (BtnBBool)
 			IO.Manip.MotorsAuxB.Set(0);
+
+		//Talon SRX Test
+		double OpJoyL = IO.DS.OperatorStick.GetY(GenericHID::kRightHand);
+		OpJoyL = deadband(OpJoyL, Control_Deadband);
+		IO.Manip.Motor.Set(OpJoyL);
+
+		//Richard's Super Testy Test Code
+		//IO.Manip.Motor.Set(ControlMode::PercentOutput, 0.5);
+
+		llvm::StringRef sMS = "MotorCmd";
+		double ms = frc::SmartDashboard::GetNumber(sMS, 600);
+		frc::SmartDashboard::PutNumber(sMS, ms);
+
+		IO.Manip.Motor.Set(ControlMode::Velocity, ms * 4096 / 600 );
+		//motorVelG(-2048);
 	}
 
 	void AutonomousInit() {
@@ -483,7 +499,31 @@ class Robot: public frc::TimedRobot {
 		}
 		return 0;
 	}
+#define KP_VEL (0.000065 / 2)
+#define KF_VEL (0.00004385)
+#define KD_VEL (0.00000006)//6
+#define KI_VEL (0.000015)
+double oldsum = 0;
+double prevError = 0;
+	void motorVelG(double targetVel){
+		double motorVel = IO.Manip.Motor.GetSensorCollection().GetQuadratureVelocity();
+		double error =  targetVel - motorVel; //pp100M
 
+
+		double sum = oldsum + error;
+		double iError = sum * MAIN_LOOP_PERIOD;
+		oldsum = sum;
+		if(abs(error) > 2000)
+			sum = 0;
+
+		double dError = (error - prevError) / MAIN_LOOP_PERIOD;
+		prevError = error;
+
+		double velCommand = targetVel * -KF_VEL + error * -KP_VEL + dError * -KD_VEL + iError * -KI_VEL;
+
+		IO.Manip.Motor.Set(velCommand);
+		SmartDashboard::PutNumber("Error(s)", error);
+	}
 	// Gets the encoder distance since last reset
 	// Algorithm selected by the dashboard chooser
 	double getEncoderDistance() {
@@ -633,6 +673,10 @@ class Robot: public frc::TimedRobot {
 			SmartDashboard::PutString(llvm::StringRef("Drive Mode"), llvm::StringRef("Mecanum"));
 			break;
 		}
+		//Talon SRX Dash Display Test
+		double EncoderCount = IO.Manip.Motor.GetSensorCollection().GetQuadratureVelocity();
+		EncoderCount = (EncoderCount / 4096.0) * 600.0; //rpm
+		SmartDashboard::PutNumber("SRX Speedz RPM", EncoderCount);
 	}
 }
 ;
