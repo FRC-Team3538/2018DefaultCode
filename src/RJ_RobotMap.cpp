@@ -36,19 +36,24 @@ RJ_RobotMap::RJ_RobotMap() {
 
 	//Configuring Test Talon SRX Encoder
 	Manip.Motor.ConfigSelectedFeedbackSensor(FeedbackDevice::CTRE_MagEncoder_Relative, 0, 0);
-	Manip.Motor.ConfigVelocityMeasurementPeriod(VelocityMeasPeriod::Period_100Ms, 0);
-	Manip.Motor.ConfigVelocityMeasurementWindow(64, 0);
+	Manip.Motor.ConfigVelocityMeasurementPeriod(VelocityMeasPeriod::Period_5Ms, 0);
+	Manip.Motor.ConfigVelocityMeasurementWindow(16, 0);
 	Manip.Motor.ConfigNominalOutputForward(0, 10);
 	Manip.Motor.ConfigNominalOutputReverse(0, 10);
 	Manip.Motor.ConfigPeakOutputForward(1, 10);
 	Manip.Motor.ConfigPeakOutputReverse(-1, 10);
 
-	Manip.Motor.Config_kF( 0, 0.047, 10);
-	Manip.Motor.Config_kP( 0, 0.053, 10);
-	Manip.Motor.Config_kI( 0, 0.00075, 10);
-	Manip.Motor.Config_kD( 0, 2 , 10);
+	Manip.Motor.Config_kF( 0, 0.04, 10); //was .047
+	Manip.Motor.Config_kP( 0, 0.0275, 10); //.053
+	Manip.Motor.Config_kI( 0, 0.00008, 10);
+	Manip.Motor.Config_kD( 0, 0.25, 10); //2
 
 	Manip.Motor.SetSensorPhase(true);
+
+	//Configuring Test Victor SPX
+	Manip.Motor2.Follow(Manip.Motor);
+
+
 	//
 	// Smart Dashboard
 	//

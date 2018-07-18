@@ -112,10 +112,8 @@ class Robot: public frc::TimedRobot {
 		double SpeedRotate = IO.DS.DriveStick.GetX(GenericHID::kRightHand) * -1; // get Xaxis value (turn)
 		double SpeedStrafe = IO.DS.DriveStick.GetX(GenericHID::kLeftHand) * 1; // get Xaxis value (Strafe)
 
-		if(driveMode == 1)
+		if (driveMode == 1)
 			SpeedRotate = IO.DS.DriveStick.GetY(GenericHID::kRightHand) * 1; // get Xaxis value (turn)
-
-
 
 		// Set dead band for control inputs
 		SpeedLinear = deadband(SpeedLinear, Control_Deadband);
@@ -199,7 +197,7 @@ class Robot: public frc::TimedRobot {
 		double RTrig = IO.DS.DriveStick.GetTriggerAxis(frc::GenericHID::kRightHand) + IO.DS.OperatorStick.GetTriggerAxis(frc::GenericHID::kRightHand);
 		LTrig = deadband(LTrig, Control_Deadband);
 		RTrig = deadband(RTrig, Control_Deadband);
-		IO.Manip.MotorsAuxA.Set(LTrig + RTrig);
+		IO.Manip.MotorsAuxA.Set(LTrig - RTrig);
 
 		//PCM 1
 		bool BtnXBool = IO.DS.DriveStick.GetXButton() + IO.DS.OperatorStick.GetXButton();
@@ -229,9 +227,11 @@ class Robot: public frc::TimedRobot {
 		llvm::StringRef sMS = "MotorCmd";
 		double ms = frc::SmartDashboard::GetNumber(sMS, 600);
 		frc::SmartDashboard::PutNumber(sMS, ms);
-
+		double LTrig2 = IO.DS.DriveStick.GetTriggerAxis(frc::GenericHID::kLeftHand) + IO.DS.OperatorStick.GetTriggerAxis(frc::GenericHID::kLeftHand);
+		double RTrig2 = IO.DS.DriveStick.GetTriggerAxis(frc::GenericHID::kRightHand) + IO.DS.OperatorStick.GetTriggerAxis(frc::GenericHID::kRightHand);
+		LTrig = deadband(LTrig2, .05);
+		RTrig = deadband(RTrig2, .05);
 		IO.Manip.Motor.Set(ControlMode::Velocity, ms * 4096 / 600 );
-		//motorVelG(-2048);
 	}
 
 	void AutonomousInit() {
@@ -503,17 +503,16 @@ class Robot: public frc::TimedRobot {
 #define KF_VEL (0.00004385)
 #define KD_VEL (0.00000006)//6
 #define KI_VEL (0.000015)
-double oldsum = 0;
-double prevError = 0;
-	void motorVelG(double targetVel){
+	double oldsum = 0;
+	double prevError = 0;
+	void motorVelG(double targetVel) {
 		double motorVel = IO.Manip.Motor.GetSensorCollection().GetQuadratureVelocity();
-		double error =  targetVel - motorVel; //pp100M
-
+		double error = targetVel - motorVel; //pp100M
 
 		double sum = oldsum + error;
 		double iError = sum * MAIN_LOOP_PERIOD;
 		oldsum = sum;
-		if(abs(error) > 2000)
+		if (abs(error) > 2000)
 			sum = 0;
 
 		double dError = (error - prevError) / MAIN_LOOP_PERIOD;

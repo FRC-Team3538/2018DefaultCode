@@ -68,6 +68,7 @@ public:
 		DigitalInput LSA_Neg { 7 };
 
 		WPI_TalonSRX Motor { 10 };
+		VictorSPX Motor2 {11};
 	};
 	structManip Manip;
 
