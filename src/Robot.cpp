@@ -158,9 +158,13 @@ class Robot: public frc::TimedRobot {
 		frc::SmartDashboard::PutNumber(sDF, df);
 		frc::SmartDashboard::SetPersistent(sDF);
 
-		OutputY = (df * OutputY) + ((1.0 - df) * SpeedLinear);
-		OutputX = (df * OutputX) + ((1.0 - df) * SpeedRotate);
-		OutputZ = (df * OutputZ) + ((1.0 - df) * SpeedStrafe);
+		llvm::StringRef dP = "Drivetrain Power";
+		double iS = frc::SmartDashboard::GetNumber(dP, 1);
+		frc::SmartDashboard::PutNumber(dP, iS);
+		iS = absMax(iS, 1);
+		OutputY = iS * (df * OutputY) + ((1.0 - df) * SpeedLinear);
+		OutputX = iS * (df * OutputX) + ((1.0 - df) * SpeedRotate);
+		OutputZ = iS * (df * OutputZ) + ((1.0 - df) * SpeedStrafe);
 
 		// Drive Code (WPI Built-in)
 		switch (driveMode) {
