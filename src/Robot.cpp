@@ -229,8 +229,8 @@ class Robot: public frc::TimedRobot {
 		frc::SmartDashboard::PutNumber(sMS, ms);
 		double LTrig2 = IO.DS.DriveStick.GetTriggerAxis(frc::GenericHID::kLeftHand) + IO.DS.OperatorStick.GetTriggerAxis(frc::GenericHID::kLeftHand);
 		double RTrig2 = IO.DS.DriveStick.GetTriggerAxis(frc::GenericHID::kRightHand) + IO.DS.OperatorStick.GetTriggerAxis(frc::GenericHID::kRightHand);
-		LTrig = deadband(LTrig2, .05);
-		RTrig = deadband(RTrig2, .05);
+		LTrig2 = deadband(LTrig2, .05);
+		RTrig2 = deadband(RTrig2, .05);
 		IO.Manip.Motor.Set(ControlMode::Velocity, ms * 4096 / 600 );
 	}
 
