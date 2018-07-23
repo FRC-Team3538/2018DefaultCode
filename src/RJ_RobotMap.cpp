@@ -33,6 +33,7 @@ RJ_RobotMap::RJ_RobotMap() {
 	Manip.A2.SetInverted(false);
 	Manip.B1.SetInverted(false);
 	Manip.B2.SetInverted(false);
+	Manip.Motor2.SetInverted(true);
 
 	//Configuring Test Talon SRX Encoder
 	Manip.Motor.ConfigSelectedFeedbackSensor(FeedbackDevice::CTRE_MagEncoder_Relative, 0, 0);
@@ -44,15 +45,14 @@ RJ_RobotMap::RJ_RobotMap() {
 	Manip.Motor.ConfigPeakOutputReverse(-1, 10);
 
 	Manip.Motor.Config_kF( 0, 0.04, 10); //was .047
-	Manip.Motor.Config_kP( 0, 0.0275, 10); //.053
-	Manip.Motor.Config_kI( 0, 0.00008, 10);
-	Manip.Motor.Config_kD( 0, 0.25, 10); //2
+	Manip.Motor.Config_kP( 0, 0.016, 10); //.053
+	Manip.Motor.Config_kI( 0, 0.0015, 10);
+	Manip.Motor.Config_kD( 0, 0.2, 10); //2
 
 	Manip.Motor.SetSensorPhase(true);
 
-	//Configuring Test Victor SPX
+	//Configuring Slave
 	Manip.Motor2.Follow(Manip.Motor);
-
 
 	//
 	// Smart Dashboard

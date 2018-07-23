@@ -10,7 +10,7 @@
 #include "RJ_RobotMap.h"
 
 #define MAIN_LOOP_PERIOD (0.020)
-#define DRIVE_MODES (3) //Number of drive modes
+#define DRIVE_MODES (2) //Number of drive modes
 
 class Robot: public frc::TimedRobot {
 
@@ -100,7 +100,7 @@ class Robot: public frc::TimedRobot {
 		// PCM 2 In By Default
 		IO.Manip.Sol_AuxB.Set(false);
 	}
-
+	int POV = 180;
 	bool bTeleAutoMode = false;
 
 	void TeleopPeriodic() {
@@ -166,13 +166,10 @@ class Robot: public frc::TimedRobot {
 		// Drive Code (WPI Built-in)
 		switch (driveMode) {
 		case 0:
-			Adrive.ArcadeDrive(OutputY, OutputX, false);
+			Adrive.ArcadeDrive(-OutputY, -OutputX, false);
 			break;
 		case 1:
-			Adrive.TankDrive(OutputY, OutputX, false);
-			break;
-		case 2:
-			Mdrive.DriveCartesian(OutputZ, OutputY, OutputX, 0);
+			Adrive.TankDrive(-OutputY, -OutputX, false);
 			break;
 		}
 
@@ -193,11 +190,13 @@ class Robot: public frc::TimedRobot {
 		 * MANIP CODE
 		 */
 		//Aux Motors A
-		double LTrig = IO.DS.DriveStick.GetTriggerAxis(frc::GenericHID::kLeftHand) + IO.DS.OperatorStick.GetTriggerAxis(frc::GenericHID::kLeftHand);
-		double RTrig = IO.DS.DriveStick.GetTriggerAxis(frc::GenericHID::kRightHand) + IO.DS.OperatorStick.GetTriggerAxis(frc::GenericHID::kRightHand);
+		double LTrig = IO.DS.DriveStick.GetTriggerAxis(frc::GenericHID::kLeftHand)
+				+ IO.DS.OperatorStick.GetTriggerAxis(frc::GenericHID::kLeftHand);
+		double RTrig = IO.DS.DriveStick.GetTriggerAxis(frc::GenericHID::kRightHand)
+				+ IO.DS.OperatorStick.GetTriggerAxis(frc::GenericHID::kRightHand);
 		LTrig = deadband(LTrig, Control_Deadband);
 		RTrig = deadband(RTrig, Control_Deadband);
-		IO.Manip.MotorsAuxA.Set(LTrig - RTrig);
+		//IO.Manip.MotorsAuxA.Set(LTrig - RTrig);
 
 		//PCM 1
 		bool BtnXBool = IO.DS.DriveStick.GetXButton() + IO.DS.OperatorStick.GetXButton();
@@ -217,21 +216,60 @@ class Robot: public frc::TimedRobot {
 			IO.Manip.MotorsAuxB.Set(0);
 
 		//Talon SRX Test
-		double OpJoyL = IO.DS.OperatorStick.GetY(GenericHID::kRightHand);
-		OpJoyL = deadband(OpJoyL, Control_Deadband);
-		IO.Manip.Motor.Set(OpJoyL);
+		double pos1RPM = -1000;
+		double pos2RPM = -3000;
+		double pos3RPM = -3450;
+
+		//double OpJoyL = IO.DS.OperatorStick.GetY(GenericHID::kRightHand);
+		//OpJoyL = deadband(OpJoyL, Control_Deadband);
+		//IO.Manip.Motor.Set(OpJoyL);
 
 		//Richard's Super Testy Test Code
 		//IO.Manip.Motor.Set(ControlMode::PercentOutput, 0.5);
-
 		llvm::StringRef sMS = "MotorCmd";
 		double ms = frc::SmartDashboard::GetNumber(sMS, 600);
 		frc::SmartDashboard::PutNumber(sMS, ms);
-		double LTrig2 = IO.DS.DriveStick.GetTriggerAxis(frc::GenericHID::kLeftHand) + IO.DS.OperatorStick.GetTriggerAxis(frc::GenericHID::kLeftHand);
-		double RTrig2 = IO.DS.DriveStick.GetTriggerAxis(frc::GenericHID::kRightHand) + IO.DS.OperatorStick.GetTriggerAxis(frc::GenericHID::kRightHand);
-		LTrig2 = deadband(LTrig2, .05);
-		RTrig2 = deadband(RTrig2, .05);
-		IO.Manip.Motor.Set(ControlMode::Velocity, ms * 4096 / 600 );
+		double LTrit2 = IO.DS.OperatorStick.GetTriggerAxis(frc::GenericHID::kLeftHand);
+		double RTrit2 = IO.DS.OperatorStick.GetTriggerAxis(frc::GenericHID::kRightHand);
+		double OpL = IO.DS.OperatorStick.GetY(GenericHID::kLeftHand);
+		OpL = deadband(OpL, Control_Deadband);
+		LTrit2 = deadband(LTrit2, .05);
+		RTrit2 = deadband(RTrit2, .05);
+		IO.Manip.MotorsAuxA.Set(LTrit2 - RTrit2);
+		IO.Manip.MattPrater.Set(-(LTrit2 - RTrit2));
+		//IO.Manip.Motor.Set(ControlMode::Velocity, ms * 4096 / 600);
+		switch (IO.DS.OperatorStick.GetPOV()) {
+		case 0:
+			IO.Manip.Motor.Set(ControlMode::Velocity, pos2RPM * 4096 / 600);
+			POV = 0;
+			break;
+		case 270:
+			IO.Manip.Motor.Set(ControlMode::Velocity, pos1RPM * 4096 / 600);
+			POV = 270;
+			break;
+		case 90:
+			IO.Manip.Motor.Set(ControlMode::Velocity, pos3RPM * 4096 / 600);
+			POV = 90;
+			break;
+		case 180:
+			IO.Manip.Motor.Set(ControlMode::PercentOutput, 0);
+			POV = 180;
+			break;
+		default:
+			POV = POV + 0;
+			break;
+		}
+		if (POV == 270) {
+			IO.Manip.Motor.Set(ControlMode::Velocity, pos1RPM * 4096 / 600);
+		} else if (POV == 0) {
+			IO.Manip.Motor.Set(ControlMode::Velocity, pos2RPM * 4096 / 600);
+		} else if (POV == 90) {
+			IO.Manip.Motor.Set(ControlMode::Velocity, pos3RPM * 4096 / 600);
+		} else if (POV == 180) {
+			IO.Manip.Motor.Set(ControlMode::PercentOutput, (OpL * 3600));
+		}
+
+		frc::SmartDashboard::PutNumber("POV", POV);
 	}
 
 	void AutonomousInit() {
@@ -269,7 +307,7 @@ class Robot: public frc::TimedRobot {
 
 	}
 
-	// Reset all the stuff that needs to be reset at each state
+// Reset all the stuff that needs to be reset at each state
 	void autoNextState() {
 		autoModeState++;
 
@@ -337,7 +375,7 @@ class Robot: public frc::TimedRobot {
 		return 1;
 	}
 
-	// Go AutoForward autonomously...
+// Go AutoForward autonomously...
 
 #define KP_LINEAR (0.0311)
 #define KI_LINEAR (0.000)
@@ -417,7 +455,7 @@ class Robot: public frc::TimedRobot {
 		return 0;
 	}
 
-	// Overload for backwards compatibility
+// Overload for backwards compatibility
 	int autoForward(double targetDistance) {
 		return autoForward(targetDistance, 1.0, 0.0);
 	}
@@ -523,8 +561,8 @@ class Robot: public frc::TimedRobot {
 		IO.Manip.Motor.Set(velCommand);
 		SmartDashboard::PutNumber("Error(s)", error);
 	}
-	// Gets the encoder distance since last reset
-	// Algorithm selected by the dashboard chooser
+// Gets the encoder distance since last reset
+// Algorithm selected by the dashboard chooser
 	double getEncoderDistance() {
 
 		// Inches per second-ish... (No encoder mode)
@@ -667,9 +705,6 @@ class Robot: public frc::TimedRobot {
 			break;
 		case 1:
 			SmartDashboard::PutString(llvm::StringRef("Drive Mode"), llvm::StringRef("Tanky Tank"));
-			break;
-		case 2:
-			SmartDashboard::PutString(llvm::StringRef("Drive Mode"), llvm::StringRef("Mecanum"));
 			break;
 		}
 		//Talon SRX Dash Display Test

@@ -25,7 +25,7 @@ public:
 	// Drive Base
 	struct structDriveBase {
 		// Left Motors
-		VictorSP L1 { 0 };
+		VictorSP L1 { 10 };
 		VictorSP L2 { 1 };
 		VictorSP L3 { 2 };
 		SpeedControllerGroup MotorsLeft { L1, L2, L3 };
@@ -53,7 +53,9 @@ public:
 	struct structManip {
 		VictorSP A1 { 6 };
 		VictorSP A2 { 7 };
-		SpeedControllerGroup MotorsAuxA { A1, A2 };
+		VictorSP DirectCon { 0 };
+		VictorSP MattPrater { 8 };
+		SpeedControllerGroup MotorsAuxA { DirectCon, A1, A2 };//A1, A2
 
 		VictorSP B1 { 8 };
 		VictorSP B2 { 9 };
@@ -67,8 +69,9 @@ public:
 		DigitalInput LSA_Pos { 6 };
 		DigitalInput LSA_Neg { 7 };
 
-		WPI_TalonSRX Motor { 10 };
-		VictorSPX Motor2 {11};
+		WPI_TalonSRX Motor { 10 }; //Mastuh
+		VictorSPX Motor2 { 11 }; //Slave
+
 	};
 	structManip Manip;
 
