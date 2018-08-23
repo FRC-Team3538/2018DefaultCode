@@ -18,8 +18,7 @@ class Robot: public frc::TimedRobot {
 	RJ_RobotMap IO;
 
 	// Built-In Drive code for teleop
-	DifferentialDrive Adrive { IO.DriveBase.MotorsLeft, IO.DriveBase.MotorsRight };
-	MecanumDrive Mdrive { IO.DriveBase.L2, IO.DriveBase.L1, IO.DriveBase.R1, IO.DriveBase.R2 };
+	DifferentialDrive Adrive { IO.DriveBase.L2, IO.DriveBase.R2 };
 	bool gearState; // For power-breaking feature
 
 	// create pdp variable
@@ -42,7 +41,7 @@ class Robot: public frc::TimedRobot {
 	void RobotInit() {
 		//disable drive watchdogs
 		Adrive.SetSafetyEnabled(false);
-		Mdrive.SetSafetyEnabled(false);
+		//Mdrive.SetSafetyEnabled(false);
 
 		// Reset Encoders
 		IO.DriveBase.EncoderLeft.Reset();
@@ -79,7 +78,7 @@ class Robot: public frc::TimedRobot {
 			driveMode = 0;
 
 		//Moar Moar Talon Testing
-		double EncoderCount = IO.Manip.Motor.GetSensorCollection().GetQuadratureVelocity();
+		//double EncoderCount = IO.Manip.Motor.GetSensorCollection().GetQuadratureVelocity();
 	}
 
 	void DisabledPeriodic() {
@@ -211,9 +210,9 @@ class Robot: public frc::TimedRobot {
 		bool BtnABool = IO.DS.DriveStick.GetAButtonPressed() || IO.DS.OperatorStick.GetAButtonPressed();
 		bool BtnBBool = IO.DS.DriveStick.GetBButtonPressed() || IO.DS.OperatorStick.GetAButtonPressed();
 		if (BtnABool)
-			IO.Manip.MotorsAuxB.Set(1);
+			//IO.Manip.MotorsAuxB.Set(1);
 		if (BtnBBool)
-			IO.Manip.MotorsAuxB.Set(0);
+			//IO.Manip.MotorsAuxB.Set(0);
 
 		//Talon SRX Test
 		double pos1RPM = -1000;
@@ -235,24 +234,25 @@ class Robot: public frc::TimedRobot {
 		OpL = deadband(OpL, Control_Deadband);
 		LTrit2 = deadband(LTrit2, .05);
 		RTrit2 = deadband(RTrit2, .05);
-		IO.Manip.MotorsAuxA.Set(LTrit2 - RTrit2);
-		IO.Manip.MattPrater.Set(-(LTrit2 - RTrit2));
+		//IO.Manip.MotorsAuxA.Set(LTrit2 - RTrit2);
+		//IO.Manip.MattPrater.Set(-(LTrit2 - RTrit2));
 		//IO.Manip.Motor.Set(ControlMode::Velocity, ms * 4096 / 600);
+	//	IO.Manip.Motor.Set(ControlMode::PercentOutput, 0.5);
 		switch (IO.DS.OperatorStick.GetPOV()) {
 		case 0:
-			IO.Manip.Motor.Set(ControlMode::Velocity, pos2RPM * 4096 / 600);
+		//	IO.Manip.Motor.Set(ControlMode::Velocity, pos2RPM * 4096 / 600);
 			POV = 0;
 			break;
 		case 270:
-			IO.Manip.Motor.Set(ControlMode::Velocity, pos1RPM * 4096 / 600);
+			//IO.Manip.Motor.Set(ControlMode::Velocity, pos1RPM * 4096 / 600);
 			POV = 270;
 			break;
 		case 90:
-			IO.Manip.Motor.Set(ControlMode::Velocity, pos3RPM * 4096 / 600);
+			//IO.Manip.Motor.Set(ControlMode::Velocity, pos3RPM * 4096 / 600);
 			POV = 90;
 			break;
 		case 180:
-			IO.Manip.Motor.Set(ControlMode::PercentOutput, 0);
+			//IO.Manip.Motor.Set(ControlMode::PercentOutput, 0);
 			POV = 180;
 			break;
 		default:
@@ -260,15 +260,15 @@ class Robot: public frc::TimedRobot {
 			break;
 		}
 		if (POV == 270) {
-			IO.Manip.Motor.Set(ControlMode::Velocity, pos1RPM * 4096 / 600);
+			//IO.Manip.Motor.Set(ControlMode::Velocity, pos1RPM * 4096 / 600);
 		} else if (POV == 0) {
-			IO.Manip.Motor.Set(ControlMode::Velocity, pos2RPM * 4096 / 600);
+			//IO.Manip.Motor.Set(ControlMode::Velocity, pos2RPM * 4096 / 600);
 		} else if (POV == 90) {
-			IO.Manip.Motor.Set(ControlMode::Velocity, pos3RPM * 4096 / 600);
+			//IO.Manip.Motor.Set(ControlMode::Velocity, pos3RPM * 4096 / 600);
 		} else if (POV == 180) {
-			IO.Manip.Motor.Set(ControlMode::PercentOutput, (OpL * 3600));
+			//IO.Manip.Motor.Set(ControlMode::PercentOutput, (OpL * 3600));
 		}
-
+		IO.DriveBase.L1.Set(ControlMode::PercentOutput, 1);
 		frc::SmartDashboard::PutNumber("POV", POV);
 	}
 
@@ -290,8 +290,8 @@ class Robot: public frc::TimedRobot {
 		IO.DriveBase.EncoderRight.Reset();
 
 		// Turn off drive motors
-		IO.DriveBase.MotorsLeft.Set(0);
-		IO.DriveBase.MotorsRight.Set(0);
+		IO.DriveBase.L2.Set(ControlMode::PercentOutput, 0);
+		IO.DriveBase.R2.Set(ControlMode::PercentOutput, 0);
 
 		// Reset the navX heading
 		IO.DriveBase.ahrs.ZeroYaw();
@@ -361,14 +361,14 @@ class Robot: public frc::TimedRobot {
 		OutputY = (cycles * OutputY) + (1.0 - cycles) * leftMotor;
 		OutputX = (cycles * OutputX) + (1.0 - cycles) * rightMotor;
 
-		IO.DriveBase.MotorsLeft.Set(-OutputY);
-		IO.DriveBase.MotorsRight.Set(OutputX);
+		IO.DriveBase.L2.Set(-OutputY);
+		IO.DriveBase.R2.Set(OutputX);
 	}
 
 	int stopMotors() {
 		//sets motor speeds to zero
-		IO.DriveBase.MotorsLeft.Set(0);
-		IO.DriveBase.MotorsRight.Set(0);
+		IO.DriveBase.L2.Set(0);
+		IO.DriveBase.R2.Set(0);
 		OutputY = 0;
 		OutputX = 0;
 		OutputZ = 0;
@@ -544,22 +544,22 @@ class Robot: public frc::TimedRobot {
 	double oldsum = 0;
 	double prevError = 0;
 	void motorVelG(double targetVel) {
-		double motorVel = IO.Manip.Motor.GetSensorCollection().GetQuadratureVelocity();
-		double error = targetVel - motorVel; //pp100M
+		//double motorVel = IO.Manip.Motor.GetSensorCollection().GetQuadratureVelocity();
+	//	double error = targetVel - motorVel; //pp100M
 
-		double sum = oldsum + error;
-		double iError = sum * MAIN_LOOP_PERIOD;
-		oldsum = sum;
-		if (abs(error) > 2000)
-			sum = 0;
+		//double sum = oldsum + error;
+		//double iError = sum * MAIN_LOOP_PERIOD;
+		//oldsum = sum;
+	//	if (abs(error) > 2000)
+			//sum = 0;
 
-		double dError = (error - prevError) / MAIN_LOOP_PERIOD;
-		prevError = error;
+		//double dError = (error - prevError) / MAIN_LOOP_PERIOD;
+		//prevError = error;
 
-		double velCommand = targetVel * -KF_VEL + error * -KP_VEL + dError * -KD_VEL + iError * -KI_VEL;
+		//double velCommand = targetVel * -KF_VEL + error * -KP_VEL + dError * -KD_VEL + iError * -KI_VEL;
 
-		IO.Manip.Motor.Set(velCommand);
-		SmartDashboard::PutNumber("Error(s)", error);
+		//IO.Manip.Motor.Set(ControlMode::PercentOutput, velCommand);
+		//SmartDashboard::PutNumber("Error(s)", error);
 	}
 // Gets the encoder distance since last reset
 // Algorithm selected by the dashboard chooser
@@ -668,8 +668,8 @@ class Robot: public frc::TimedRobot {
 	void SmartDashboardUpdate() {
 
 		// Motor Outputs
-		SmartDashboard::PutNumber("Drive Left (PWM)", IO.DriveBase.MotorsLeft.Get());
-		SmartDashboard::PutNumber("Drive Right (PWM)", IO.DriveBase.MotorsRight.Get());
+		//SmartDashboard::PutNumber("Drive Left (PWM)", IO.DriveBase.MotorsLeft.Get());
+		//SmartDashboard::PutNumber("Drive Right (PWM)", IO.DriveBase.MotorsRight.Get());
 
 		// Drive Joystick Inputs
 		SmartDashboard::PutNumber("Speed Linear", IO.DS.DriveStick.GetY(GenericHID::kLeftHand));
@@ -708,9 +708,9 @@ class Robot: public frc::TimedRobot {
 			break;
 		}
 		//Talon SRX Dash Display Test
-		double EncoderCount = IO.Manip.Motor.GetSensorCollection().GetQuadratureVelocity();
-		EncoderCount = (EncoderCount / 4096.0) * 600.0; //rpm
-		SmartDashboard::PutNumber("SRX Speedz RPM", EncoderCount);
+		//double EncoderCount = IO.Manip.Motor.GetSensorCollection().GetQuadratureVelocity();
+	//	EncoderCount = (EncoderCount / 4096.0) * 600.0; //rpm
+		//SmartDashboard::PutNumber("SRX Speedz RPM", EncoderCount);
 	}
 }
 ;

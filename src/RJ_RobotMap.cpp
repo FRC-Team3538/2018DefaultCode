@@ -7,10 +7,10 @@ RJ_RobotMap::RJ_RobotMap() {
 	//
 
 	// Set Motor directions
-	DriveBase.MotorsLeft.SetInverted(false);
-	DriveBase.MotorsRight.SetInverted(false);
+	DriveBase.L2.SetInverted(false);
+	DriveBase.R2.SetInverted(false);
 
-
+	//Slave
 
 	// Set Encoder Direction & Scale
 	DriveBase.EncoderLeft.SetReverseDirection(true);
@@ -29,30 +29,26 @@ RJ_RobotMap::RJ_RobotMap() {
 	Manip.EncoderAuxA.SetDistancePerPulse(1);
 
 	//Set Manip Motor Directions
-	Manip.A1.SetInverted(false);
-	Manip.A2.SetInverted(false);
-	Manip.B1.SetInverted(false);
-	Manip.B2.SetInverted(false);
-	Manip.Motor2.SetInverted(true);
+//	Manip.A1.SetInverted(false);
+//	Manip.A2.SetInverted(false);
+//	Manip.B1.SetInverted(false);
+//	Manip.B2.SetInverted(false);
+//	Manip.Motor2.SetInverted(true);
 
 	//Configuring Test Talon SRX Encoder
-	Manip.Motor.ConfigSelectedFeedbackSensor(FeedbackDevice::CTRE_MagEncoder_Relative, 0, 0);
-	Manip.Motor.ConfigVelocityMeasurementPeriod(VelocityMeasPeriod::Period_5Ms, 0);
-	Manip.Motor.ConfigVelocityMeasurementWindow(16, 0);
-	Manip.Motor.ConfigNominalOutputForward(0, 10);
-	Manip.Motor.ConfigNominalOutputReverse(0, 10);
-	Manip.Motor.ConfigPeakOutputForward(1, 10);
-	Manip.Motor.ConfigPeakOutputReverse(-1, 10);
+	/*DriveBase.L2.ConfigNominalOutputForward(0, 10);
+	DriveBase.L2.ConfigNominalOutputReverse(0, 10);
+	DriveBase.L2.ConfigPeakOutputForward(1, 10);
+	DriveBase.L2.ConfigPeakOutputReverse(-1, 10);*/
 
-	Manip.Motor.Config_kF( 0, 0.04, 10); //was .047
-	Manip.Motor.Config_kP( 0, 0.016, 10); //.053
-	Manip.Motor.Config_kI( 0, 0.0015, 10);
-	Manip.Motor.Config_kD( 0, 0.2, 10); //2
 
-	Manip.Motor.SetSensorPhase(true);
 
 	//Configuring Slave
-	Manip.Motor2.Follow(Manip.Motor);
+	DriveBase.L1.Follow(DriveBase.L2);
+	DriveBase.L3.Follow(DriveBase.L2);
+
+	DriveBase.R1.Follow(DriveBase.L2);
+	DriveBase.R3.Follow(DriveBase.L2);
 
 	//
 	// Smart Dashboard

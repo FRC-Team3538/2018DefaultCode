@@ -25,16 +25,22 @@ public:
 	// Drive Base
 	struct structDriveBase {
 		// Left Motors
-		VictorSP L1 { 10 };
-		VictorSP L2 { 1 };
-		VictorSP L3 { 2 };
-		SpeedControllerGroup MotorsLeft { L1, L2, L3 };
+		VictorSPX L1 { 0 };
+		WPI_TalonSRX L2 { 1 };
+		VictorSPX L3 { 2 };
+		//SpeedControllerGroup MotorsLeft { L1, L2, L3 };
 
 		// Right Motors
-		VictorSP R1 { 3 };
-		VictorSP R2 { 4 };
-		VictorSP R3 { 5 };
-		SpeedControllerGroup MotorsRight { R1, R2, R3 };
+		VictorSPX R1 { 3 };
+		WPI_TalonSRX R2 { 4 };
+		VictorSPX R3 { 5 };
+
+		VictorSPX R4 { 7 };
+		WPI_TalonSRX R5 { 6 };
+		VictorSPX R6 { 8 };
+		VictorSPX R7 { 10 };
+		VictorSPX R8 { 9 };
+		//SpeedControllerGroup MotorsRight { R1, R2, R3 };
 
 		// Drive Base Encoders
 		Encoder EncoderLeft { 0, 1 };
@@ -51,16 +57,6 @@ public:
 	structDriveBase DriveBase;
 
 	struct structManip {
-		VictorSP A1 { 6 };
-		VictorSP A2 { 7 };
-		VictorSP DirectCon { 0 };
-		VictorSP MattPrater { 8 };
-		SpeedControllerGroup MotorsAuxA { DirectCon, A1, A2 };//A1, A2
-
-		VictorSP B1 { 8 };
-		VictorSP B2 { 9 };
-		SpeedControllerGroup MotorsAuxB { B1, B2 };
-
 		Solenoid Sol_AuxA { 1 };
 		Solenoid Sol_AuxB { 2 };
 
@@ -68,9 +64,6 @@ public:
 
 		DigitalInput LSA_Pos { 6 };
 		DigitalInput LSA_Neg { 7 };
-
-		WPI_TalonSRX Motor { 10 }; //Mastuh
-		VictorSPX Motor2 { 11 }; //Slave
 
 	};
 	structManip Manip;
