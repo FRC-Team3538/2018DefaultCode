@@ -26,14 +26,12 @@ public:
 		// Left Motors
 		VictorSP L1 { 0 };
 		VictorSP L2 { 1 };
-		VictorSP L3 { 2 };
-		SpeedControllerGroup MotorsLeft { L1, L2, L3 };
+		SpeedControllerGroup MotorsLeft { L1, L2 };
 
 		// Right Motors
-		VictorSP R1 { 3 };
-		VictorSP R2 { 4 };
-		VictorSP R3 { 5 };
-		SpeedControllerGroup MotorsRight { R1, R2, R3 };
+		VictorSP R1 { 2 };
+		VictorSP R2 { 3 };
+		SpeedControllerGroup MotorsRight { R1, R2 };
 
 		// Drive Base Encoders
 		Encoder EncoderLeft { 0, 1 };
@@ -50,13 +48,15 @@ public:
 	structDriveBase DriveBase;
 
 	struct structManip {
-		VictorSP A1 { 6 };
-		VictorSP A2 { 7 };
-		SpeedControllerGroup MotorsAuxA { A1, A2 };
+		VictorSP A1 { 5 };
+		VictorSP A2 { 6 };
+		VictorSP A3 { 7 };
+		SpeedControllerGroup MotorsAuxA { A3, A2 };
 
 		VictorSP B1 { 8 };
-		VictorSP B2 { 9 };
-		SpeedControllerGroup MotorsAuxB { B1, B2 };
+		SpeedControllerGroup MotorsAuxB { B1 };
+
+		VictorSP C1 { 9 };
 
 		Solenoid Sol_AuxA { 1 };
 		Solenoid Sol_AuxB { 2 };

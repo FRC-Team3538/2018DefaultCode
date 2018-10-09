@@ -31,8 +31,9 @@ RJ_RobotMap::RJ_RobotMap() {
 	//Set Manip Motor Directions
 	Manip.A1.SetInverted(false);
 	Manip.A2.SetInverted(false);
+	Manip.A3.SetInverted(false);
 	Manip.B1.SetInverted(false);
-	Manip.B2.SetInverted(false);
+	Manip.C1.SetInverted(true);
 
 	//
 	// Smart Dashboard

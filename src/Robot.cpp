@@ -109,10 +109,8 @@ class Robot: public frc::TimedRobot {
 		double SpeedRotate = IO.DS.DriveStick.GetX(GenericHID::kRightHand) * -1; // get Xaxis value (turn)
 		double SpeedStrafe = IO.DS.DriveStick.GetX(GenericHID::kLeftHand) * 1; // get Xaxis value (Strafe)
 
-		if(driveMode == 1)
+		if (driveMode == 1)
 			SpeedRotate = IO.DS.DriveStick.GetY(GenericHID::kRightHand) * 1; // get Xaxis value (turn)
-
-
 
 		// Set dead band for control inputs
 		SpeedLinear = deadband(SpeedLinear, Control_Deadband);
@@ -203,24 +201,30 @@ class Robot: public frc::TimedRobot {
 				+ IO.DS.OperatorStick.GetTriggerAxis(frc::GenericHID::kRightHand);
 		LTrig = deadband(LTrig, Control_Deadband);
 		RTrig = deadband(RTrig, Control_Deadband);
-		IO.Manip.MotorsAuxA.Set(LTrig + RTrig);
+		IO.Manip.MotorsAuxB.Set(RTrig - LTrig);
 
 		//PCM 1
 		bool BtnXBool = IO.DS.DriveStick.GetXButton() + IO.DS.OperatorStick.GetXButton();
-		IO.Manip.Sol_AuxA.Set(BtnXBool);
 
 		//PCM 2
 		bool BtnYBool = IO.DS.DriveStick.GetYButtonPressed() || IO.DS.OperatorStick.GetYButtonPressed();
-		bool PCM2Toggled = IO.Manip.Sol_AuxB.Get();
-		if (BtnYBool)
-			IO.Manip.Sol_AuxB.Set(!PCM2Toggled);
 		//Aux Motors B
 		bool BtnABool = IO.DS.DriveStick.GetAButtonPressed() || IO.DS.OperatorStick.GetAButtonPressed();
-		bool BtnBBool = IO.DS.DriveStick.GetBButtonPressed() || IO.DS.OperatorStick.GetAButtonPressed();
+		bool BtnBBool = IO.DS.DriveStick.GetBButtonPressed() || IO.DS.OperatorStick.GetBButtonPressed();
 		if (BtnABool)
-			IO.Manip.MotorsAuxB.Set(1);
+			IO.Manip.C1.Set(0.8);
 		if (BtnBBool)
-			IO.Manip.MotorsAuxB.Set(0);
+			IO.Manip.C1.Set(0);
+
+		if (BtnXBool)
+			IO.Manip.MotorsAuxA.Set(1);
+		if (BtnYBool)
+			IO.Manip.MotorsAuxA.Set(0);
+
+		if (IO.DS.OperatorStick.GetBumper(frc::GenericHID::kRightHand))
+			IO.Manip.A1.Set(1);
+		else
+			IO.Manip.A1.Set(0);
 	}
 
 	void AutonomousInit() {
