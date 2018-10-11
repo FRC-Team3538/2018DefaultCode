@@ -5,6 +5,7 @@
 #include <string>
 #include "math.h"
 #include <algorithm>
+#include <fstream>
 
 // And So It Begins...
 #include "RJ_RobotMap.h"
@@ -17,9 +18,10 @@ class Robot: public frc::TimedRobot {
 	// Robot Hardware Setup
 	RJ_RobotMap IO;
 
+	DriverStation& ds = DriverStation::GetInstance();
+
 	// Built-In Drive code for teleop
-	DifferentialDrive Adrive { IO.DriveBase.MotorsLeft, IO.DriveBase.MotorsRight };
-	MecanumDrive Mdrive { IO.DriveBase.L2, IO.DriveBase.L1, IO.DriveBase.R1, IO.DriveBase.R2 };
+	DifferentialDrive Adrive { IO.DriveBase.L1, IO.DriveBase.R1 };
 	bool gearState; // For power-breaking feature
 
 	// create pdp variable
@@ -39,10 +41,12 @@ class Robot: public frc::TimedRobot {
 	int autoModeState;  // current step in auto sequence
 	double autoHeading; // current gyro heading to maintain
 
+	//Encoder Text File and Times
+	std::ofstream fLogFile;
+	Timer EncoderTimer;
 	void RobotInit() {
 		//disable drive watchdogs
 		Adrive.SetSafetyEnabled(false);
-		Mdrive.SetSafetyEnabled(false);
 
 		// Reset Encoders
 		IO.DriveBase.EncoderLeft.Reset();
@@ -50,6 +54,11 @@ class Robot: public frc::TimedRobot {
 
 		// Zeros the NavX Yaw
 		IO.DriveBase.ahrs.ZeroYaw();
+
+		IO.DriveBase.L1.GetSensorCollection().SetQuadraturePosition(0, 0);
+
+		fLogFile.open("/home/lvuser/fLogFile.csv", std::ios::trunc);
+		fLogFile << "Time, Encoder Velocity (Fps), Distance (Inch)" << std::endl;
 
 		// 20ms is the default, but lets enforce it.
 		this->SetPeriod(MAIN_LOOP_PERIOD);
@@ -77,6 +86,28 @@ class Robot: public frc::TimedRobot {
 			driveMode++;
 		if (driveMode == DRIVE_MODES)
 			driveMode = 0;
+
+		double EncLPos = IO.DriveBase.L1.GetSensorCollection().GetQuadraturePosition();
+		EncLPos = EncLPos / 4;
+		double EncLDist = EncLPos * -((4 * 3.14159265) / 128);
+		double EncLSpeed = IO.DriveBase.L1.GetSensorCollection().GetQuadratureVelocity();
+		EncLSpeed = EncLSpeed * -10; //Makes it edges/sec
+		double EncLRPM = EncLSpeed * 60 / 512; //*60 to make it a minute, there are 512 edges per rotation
+		double EncLFps = EncLRPM / 60 * (4 * 3.14159265) / 12; //Divide rpm by 60 to get rps, times rps by distance per rotation in inches, divide by twelve for ft
+		double EncLMmph = EncLFps * 304.8 * 3600;
+		SmartDashboard::PutNumber("Encoder Left(Inches)", EncLDist);
+		SmartDashboard::PutNumber("(Velocity FpS)", EncLFps);
+		SmartDashboard::PutNumber("(Velocity RPM)", EncLRPM);
+		SmartDashboard::PutNumber("(Velocity MMpH)", EncLMmph);
+
+		//Put fps data in txt file
+		if (ds.IsEnabled()) {
+			EncoderTimer.Start();
+			fLogFile << EncoderTimer.Get() << "," << EncLFps << "," << EncLDist << std::endl;
+		} else {
+			EncoderTimer.Reset();
+		}
+
 	}
 
 	void DisabledPeriodic() {
@@ -109,10 +140,8 @@ class Robot: public frc::TimedRobot {
 		double SpeedRotate = IO.DS.DriveStick.GetX(GenericHID::kRightHand) * -1; // get Xaxis value (turn)
 		double SpeedStrafe = IO.DS.DriveStick.GetX(GenericHID::kLeftHand) * 1; // get Xaxis value (Strafe)
 
-		if(driveMode == 1)
+		if (driveMode == 1)
 			SpeedRotate = IO.DS.DriveStick.GetY(GenericHID::kRightHand) * 1; // get Xaxis value (turn)
-
-
 
 		// Set dead band for control inputs
 		SpeedLinear = deadband(SpeedLinear, Control_Deadband);
@@ -176,7 +205,6 @@ class Robot: public frc::TimedRobot {
 			Adrive.TankDrive(OutputY, OutputX, false);
 			break;
 		case 2:
-			Mdrive.DriveCartesian(OutputZ, OutputY, OutputX, 0);
 			break;
 		}
 
@@ -221,6 +249,7 @@ class Robot: public frc::TimedRobot {
 			IO.Manip.MotorsAuxB.Set(1);
 		if (BtnBBool)
 			IO.Manip.MotorsAuxB.Set(0);
+
 	}
 
 	void AutonomousInit() {
@@ -241,8 +270,8 @@ class Robot: public frc::TimedRobot {
 		IO.DriveBase.EncoderRight.Reset();
 
 		// Turn off drive motors
-		IO.DriveBase.MotorsLeft.Set(0);
-		IO.DriveBase.MotorsRight.Set(0);
+		IO.DriveBase.L1.Set(0);
+		IO.DriveBase.R1.Set(0);
 
 		// Reset the navX heading
 		IO.DriveBase.ahrs.ZeroYaw();
@@ -312,14 +341,14 @@ class Robot: public frc::TimedRobot {
 		OutputY = (cycles * OutputY) + (1.0 - cycles) * leftMotor;
 		OutputX = (cycles * OutputX) + (1.0 - cycles) * rightMotor;
 
-		IO.DriveBase.MotorsLeft.Set(-OutputY);
-		IO.DriveBase.MotorsRight.Set(OutputX);
+		IO.DriveBase.L1.Set(-OutputY);
+		IO.DriveBase.R1.Set(OutputX);
 	}
 
 	int stopMotors() {
 		//sets motor speeds to zero
-		IO.DriveBase.MotorsLeft.Set(0);
-		IO.DriveBase.MotorsRight.Set(0);
+		IO.DriveBase.L1.Set(0);
+		IO.DriveBase.R1.Set(0);
 		OutputY = 0;
 		OutputX = 0;
 		OutputZ = 0;
@@ -596,8 +625,8 @@ class Robot: public frc::TimedRobot {
 	void SmartDashboardUpdate() {
 
 		// Motor Outputs
-		SmartDashboard::PutNumber("Drive Left (PWM)", IO.DriveBase.MotorsLeft.Get());
-		SmartDashboard::PutNumber("Drive Right (PWM)", IO.DriveBase.MotorsRight.Get());
+		SmartDashboard::PutNumber("Drive Left (PWM)", IO.DriveBase.L1.Get());
+		SmartDashboard::PutNumber("Drive Right (PWM)", IO.DriveBase.R1.Get());
 
 		// Drive Joystick Inputs
 		SmartDashboard::PutNumber("Speed Linear", IO.DS.DriveStick.GetY(GenericHID::kLeftHand));
@@ -610,11 +639,11 @@ class Robot: public frc::TimedRobot {
 		SmartDashboard::PutNumber("Auto Heading", autoHeading);
 
 		// Drive Encoders
-		SmartDashboard::PutNumber("Drive Encoder Left (RAW)", IO.DriveBase.EncoderLeft.GetRaw());
-		SmartDashboard::PutNumber("Drive Encoder Left (Inches)", IO.DriveBase.EncoderLeft.GetDistance());
+		//SmartDashboard::PutNumber("Drive Encoder Left (RAW)", IO.DriveBase.EncoderLeft.GetRaw());
+		//SmartDashboard::PutNumber("Drive Encoder Left (Inches)", IO.DriveBase.EncoderLeft.GetDistance());
 
-		SmartDashboard::PutNumber("Drive Encoder Right (RAW)", IO.DriveBase.EncoderRight.GetRaw());
-		SmartDashboard::PutNumber("Drive Encoder Right (Inch)", IO.DriveBase.EncoderRight.GetDistance());
+		//SmartDashboard::PutNumber("Drive Encoder Right (RAW)", IO.DriveBase.EncoderRight.GetRaw());
+		//SmartDashboard::PutNumber("Drive Encoder Right (Inch)", IO.DriveBase.EncoderRight.GetDistance());
 
 		// Gyro
 		if (&IO.DriveBase.ahrs) {

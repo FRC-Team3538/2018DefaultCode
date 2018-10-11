@@ -7,18 +7,19 @@ RJ_RobotMap::RJ_RobotMap() {
 	//
 
 	// Set Motor directions
-	DriveBase.MotorsLeft.SetInverted(false);
-	DriveBase.MotorsRight.SetInverted(false);
+	DriveBase.L1.SetInverted(false);
+	DriveBase.R1.SetInverted(false);
 
-
+	DriveBase.L2.Follow(DriveBase.L1);
+	DriveBase.R2.Follow(DriveBase.R1);
 
 	// Set Encoder Direction & Scale
-	DriveBase.EncoderLeft.SetReverseDirection(true);
-	DriveBase.EncoderRight.SetReverseDirection(false);
+	DriveBase.L1.ConfigSelectedFeedbackSensor(FeedbackDevice::QuadEncoder, 0, 0);
+	DriveBase.L1.ConfigVelocityMeasurementPeriod(VelocityMeasPeriod::Period_25Ms, 0);
+	DriveBase.L1.ConfigVelocityMeasurementWindow(32, 0);
+	DriveBase.L1.SetStatusFramePeriod(ctre::phoenix::motorcontrol::StatusFrame::Status_2_Feedback0_, 10, 100);
 
 	// Encoder Scale Factor
-	DriveBase.EncoderLeft.SetDistancePerPulse(167.0 / 16745.0 * 4.0);
-	DriveBase.EncoderRight.SetDistancePerPulse(-167.0 / 16745.0 * 4.0);
 
 	// Set Default Gear
 	DriveBase.SolenoidShifter.Set(false);

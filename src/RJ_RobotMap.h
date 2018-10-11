@@ -3,6 +3,7 @@
 
 #include "WPILib.h"
 #include "AHRS.h"
+#include "ctre/phoenix.h"
 
 class RJ_RobotMap {
 
@@ -10,6 +11,7 @@ public:
 
 	// Driver's Station
 	struct structDS {
+
 
 		XboxController DriveStick { 0 };
 		XboxController OperatorStick { 1 };
@@ -24,16 +26,12 @@ public:
 	// Drive Base
 	struct structDriveBase {
 		// Left Motors
-		VictorSP L1 { 0 };
-		VictorSP L2 { 1 };
-		VictorSP L3 { 2 };
-		SpeedControllerGroup MotorsLeft { L1, L2, L3 };
+		WPI_TalonSRX L1 { 0 };
+		VictorSPX L2 { 2 };
 
 		// Right Motors
-		VictorSP R1 { 3 };
-		VictorSP R2 { 4 };
-		VictorSP R3 { 5 };
-		SpeedControllerGroup MotorsRight { R1, R2, R3 };
+		WPI_TalonSRX R1 { 1 };
+		VictorSPX R2 { 3 };
 
 		// Drive Base Encoders
 		Encoder EncoderLeft { 0, 1 };
