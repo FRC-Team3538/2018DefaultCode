@@ -17,7 +17,7 @@ RJ_RobotMap::RJ_RobotMap() {
 	DriveBase.L1.ConfigSelectedFeedbackSensor(FeedbackDevice::QuadEncoder, 0, 0);
 	DriveBase.L1.ConfigVelocityMeasurementPeriod(VelocityMeasPeriod::Period_25Ms, 0);
 	DriveBase.L1.ConfigVelocityMeasurementWindow(32, 0);
-	DriveBase.L1.SetStatusFramePeriod(ctre::phoenix::motorcontrol::StatusFrame::Status_2_Feedback0_, 10, 100);
+	DriveBase.L1.SetStatusFramePeriod(ctre::phoenix::motorcontrol::StatusFrameEnhanced::Status_3_Quadrature, 3, 100);
 
 	// Encoder Scale Factor
 
