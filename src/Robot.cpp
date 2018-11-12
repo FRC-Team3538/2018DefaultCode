@@ -18,6 +18,9 @@ class Robot: public frc::TimedRobot {
 	// Robot Hardware Setup
 	RJ_RobotMap IO;
 
+	//Waypoints Setup
+	MotionProfileStatus _status;
+
 	DriverStation& ds = DriverStation::GetInstance();
 
 	// Built-In Drive code for teleop
@@ -45,8 +48,12 @@ class Robot: public frc::TimedRobot {
 	std::ofstream fLogFile;
 	Timer EncoderTimer;
 	void RobotInit() {
+
 		//disable drive watchdogs
 		Adrive.SetSafetyEnabled(false);
+
+		IO.DriveBase.L1.ClearMotionProfileHasUnderrun(50);
+		IO.DriveBase.R1.ClearMotionProfileHasUnderrun(50);
 
 		// Reset Encoders
 		IO.DriveBase.EncoderLeft.Reset();
@@ -249,7 +256,6 @@ class Robot: public frc::TimedRobot {
 			IO.Manip.MotorsAuxB.Set(1);
 		if (BtnBBool)
 			IO.Manip.MotorsAuxB.Set(0);
-
 	}
 
 	void AutonomousInit() {

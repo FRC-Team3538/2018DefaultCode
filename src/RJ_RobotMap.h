@@ -72,6 +72,8 @@ public:
 	// Send all of the NavX data to the SmartDashboard
 	void NavXDebugger();
 
+	//Waypoints
+	void RJ_Waypoints();
 };
 
 #endif
