@@ -18,7 +18,20 @@ RJ_RobotMap::RJ_RobotMap() {
 	DriveBase.L1.ConfigVelocityMeasurementPeriod(VelocityMeasPeriod::Period_25Ms, 0);
 	DriveBase.L1.ConfigVelocityMeasurementWindow(32, 0);
 	DriveBase.L1.SetStatusFramePeriod(ctre::phoenix::motorcontrol::StatusFrameEnhanced::Status_3_Quadrature, 3, 100);
-
+	DriveBase.R1.ConfigSelectedFeedbackSensor(FeedbackDevice::QuadEncoder, 0, 0);
+	DriveBase.R1.ConfigVelocityMeasurementPeriod(VelocityMeasPeriod::Period_25Ms, 0);
+	DriveBase.R1.ConfigVelocityMeasurementWindow(32, 0);
+	DriveBase.R1.SetStatusFramePeriod(ctre::phoenix::motorcontrol::StatusFrameEnhanced::Status_3_Quadrature, 3, 100);
+	DriveBase.R1.Config_kF(0, 0.076, 0);
+	DriveBase.R1.Config_kP(0, 0.001, 0);
+	DriveBase.R1.Config_kI(0, 0.0, 0);
+	DriveBase.R1.Config_kD(0, 0.0, 0);
+	DriveBase.L1.Config_kF(0, 0.076, 0);
+	DriveBase.L1.Config_kP(0, 0.001, 0);
+	DriveBase.L1.Config_kI(0, 0.0, 0);
+	DriveBase.L1.Config_kD(0, 0.0, 0);
+	DriveBase.L1.ConfigMotionProfileTrajectoryPeriod(10, 30);
+	DriveBase.R1.ConfigMotionProfileTrajectoryPeriod(10, 30);
 	// Encoder Scale Factor
 
 	// Set Default Gear
@@ -41,6 +54,7 @@ RJ_RobotMap::RJ_RobotMap() {
 
 	//Auto Chooser
 	DS.chooseAutoProgram.AddObject(DS.AutoLine, DS.AutoLine);
+	DS.chooseAutoProgram.AddObject(DS.AutoTest, DS.AutoTest);
 	DS.chooseAutoProgram.AddDefault(DS.AutoNone, DS.AutoNone);
 	frc::SmartDashboard::PutData("Auto OBJ", &DS.chooseAutoProgram);
 

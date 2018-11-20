@@ -19,6 +19,7 @@ public:
 		SendableChooser<llvm::StringRef> chooseAutoProgram;
 		const llvm::StringRef AutoNone = "1 None";
 		const llvm::StringRef AutoLine = "2 Line";
+		const llvm::StringRef AutoTest = "3 Test";
 
 	};
 	structDS DS;

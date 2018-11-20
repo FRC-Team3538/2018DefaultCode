@@ -4,7 +4,9 @@
 #include "RJ_RobotMap.h"
 RJ_RobotMap IO;
 
-class MotionMagic: public Waypoints {
+class MotionMagic{
+public:
+	Waypoints Waypoints;
 	MotionProfileStatus _status;
 	TalonSRX & _talon;
 
@@ -207,8 +209,16 @@ class MotionMagic: public Waypoints {
 	}
 
 	void startFilling() {
-			/* since this example only has one talon, just update that one */
-			startFilling(kMotionProfile, kMotionProfileSz);
+		/* since this example only has one talon, just update that one */
+		startFilling(Waypoints.kMotionProfile, Waypoints.kMotionProfileSz);
+	}
+
+	void start() {
+		_bStart = true;
+	}
+
+	SetValueMotionProfile getSetValue() {
+		return _setValue;
 	}
 };
 
